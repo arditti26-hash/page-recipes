@@ -53,15 +53,22 @@ def github_put_cache(data, sha, message="Sync recipes"):
 # ── Google Sheet helpers ───────────────────────────────────────────────────────
 
 def get_sheet_urls():
-    """Read URLs from Google Sheet CSV export."""
+    """Read URLs from Google Sheet — checks column B (hyperlinks) then column A (plain text)."""
+    import csv, io
     req = urllib.request.Request(GOOGLE_SHEET_URL, headers={"User-Agent": "Mozilla/5.0"})
     with urllib.request.urlopen(req, timeout=15) as r:
         text = r.read().decode("utf-8", errors="replace")
+    skip = {"search.app", "share.google"}
     urls = []
-    for line in text.strip().splitlines():
-        cell = line.strip().strip('"').strip()
-        if cell.startswith("http"):
-            urls.append(cell)
+    seen = set()
+    reader = csv.reader(io.StringIO(text))
+    for row in reader:
+        for cell in row[:2]:  # check both col A and col B
+            cell = cell.strip()
+            if cell.startswith("http") and not any(s in cell for s in skip):
+                if cell not in seen:
+                    seen.add(cell)
+                    urls.append(cell)
     return urls
 
 # ── Recipe fetching (stdlib only) ─────────────────────────────────────────────
@@ -209,11 +216,7 @@ def do_sync():
                 import traceback
                 print(f"FAILED {url}: {e}")
                 traceback.print_exc()
-                data.setdefault("recipes", {})[url] = {
-                    "title": url, "url": url, "error": str(e),
-                    "ingredients": [], "instructions": [], "source": "error"
-                }
-                failed += 1
+                failed += 1  # Don't save error entries — retry on next sync
 
         if new_urls:
             _, sha = github_get_cache()   # refresh SHA before commit
