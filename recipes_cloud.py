@@ -204,8 +204,11 @@ def do_sync():
                 recipe = fetch_recipe(url)
                 data.setdefault("recipes", {})[url] = recipe
                 fetched += 1
+                print(f"OK: {recipe.get('title','?')}")
             except Exception as e:
-                print(f"Failed {url}: {e}")
+                import traceback
+                print(f"FAILED {url}: {e}")
+                traceback.print_exc()
                 data.setdefault("recipes", {})[url] = {
                     "title": url, "url": url, "error": str(e),
                     "ingredients": [], "instructions": [], "source": "error"
