@@ -253,6 +253,27 @@ class Handler(BaseHTTPRequestHandler):
             self.send_body(json.dumps(load_recipes()), "application/json")
         elif path == "/api/config":
             self.send_body(json.dumps({"syncAvailable": bool(GITHUB_TOKEN and GOOGLE_SHEET_URL)}), "application/json")
+        elif path == "/api/debug":
+            debug = {
+                "GITHUB_TOKEN_SET": bool(GITHUB_TOKEN),
+                "GITHUB_TOKEN_PREFIX": GITHUB_TOKEN[:10] + "..." if GITHUB_TOKEN else "",
+                "GITHUB_REPO": GITHUB_REPO,
+                "GOOGLE_SHEET_URL_SET": bool(GOOGLE_SHEET_URL),
+                "recipes_in_memory": len(_recipes_mem) if _recipes_mem else 0,
+            }
+            try:
+                urls = get_sheet_urls()
+                debug["sheet_urls_count"] = len(urls)
+                debug["sheet_last_url"] = urls[-1] if urls else ""
+            except Exception as e:
+                debug["sheet_error"] = str(e)
+            try:
+                data, sha = github_get_cache()
+                debug["github_cache_recipes"] = len(data.get("recipes", {}))
+                debug["github_sha"] = sha[:8]
+            except Exception as e:
+                debug["github_error"] = str(e)
+            self.send_body(json.dumps(debug, indent=2), "application/json")
         else:
             self.send_body(HTML)
 
