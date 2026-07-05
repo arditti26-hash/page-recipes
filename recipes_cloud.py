@@ -373,7 +373,7 @@ class Handler(BaseHTTPRequestHandler):
                     if _recipes_mem is not None:
                         _recipes_mem[url] = {**recipe, "url": url}
                 print(f"Added via URL box: {recipe.get('title','?')}")
-                threading.Thread(target=_background_push_cache, args=(f"Add recipe: {recipe.get('title','Untitled')}",), daemon=True).start()
+                _background_push_cache(f"Add recipe: {recipe.get('title','Untitled')}")
                 self.send_body(json.dumps({"status": "ok", "title": recipe.get("title", "Untitled")}), "application/json")
             except Exception as e:
                 self.send_body(json.dumps({"status": "error", "message": str(e)}), "application/json")
