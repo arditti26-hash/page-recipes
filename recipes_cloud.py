@@ -65,13 +65,17 @@ def github_put_cache(recipes_dict, message):
     with urllib.request.urlopen(put_req, timeout=15) as r:
         json.loads(r.read())
 
+def _push_cache_now(message):
+    """Synchronous push; raises on failure so callers can handle it."""
+    with _cache_lock:
+        snapshot = dict(_recipes_mem) if _recipes_mem else {}
+    github_put_cache(snapshot, message)
+    print(f"Pushed cache to GitHub: {message}")
+
 def _background_push_cache(message):
-    """Push the current recipe snapshot to GitHub without blocking the request."""
+    """Best-effort background push (notes/photos/deletes). Logs failures."""
     try:
-        with _cache_lock:
-            snapshot = dict(_recipes_mem) if _recipes_mem else {}
-        github_put_cache(snapshot, message)
-        print(f"Pushed cache to GitHub: {message}")
+        _push_cache_now(message)
     except Exception as e:
         print(f"GitHub push failed: {e}")
 
@@ -373,7 +377,15 @@ class Handler(BaseHTTPRequestHandler):
                     if _recipes_mem is not None:
                         _recipes_mem[url] = {**recipe, "url": url}
                 print(f"Added via URL box: {recipe.get('title','?')}")
-                _background_push_cache(f"Add recipe: {recipe.get('title','Untitled')}")
+                try:
+                    _push_cache_now(f"Add recipe: {recipe.get('title','Untitled')}")
+                except Exception as pe:
+                    print(f"GitHub push failed on add: {pe}")
+                    with _cache_lock:
+                        if _recipes_mem and url in _recipes_mem:
+                            del _recipes_mem[url]
+                    self.send_body(json.dumps({"status": "error", "message": "Recipe fetched but could not be saved — please try again."}), "application/json")
+                    return
                 self.send_body(json.dumps({"status": "ok", "title": recipe.get("title", "Untitled")}), "application/json")
             except Exception as e:
                 self.send_body(json.dumps({"status": "error", "message": str(e)}), "application/json")
