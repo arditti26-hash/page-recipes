@@ -411,7 +411,7 @@ class Handler(BaseHTTPRequestHandler):
                     with _cache_lock:
                         if _recipes_mem and url in _recipes_mem:
                             del _recipes_mem[url]
-                    self.send_body(json.dumps({"status": "error", "message": "Recipe fetched but could not be saved — please try again."}), "application/json")
+                    self.send_body(json.dumps({"status": "error", "message": f"GitHub save failed: {pe}"}), "application/json")
                     return
                 self.send_body(json.dumps({"status": "ok", "title": recipe.get("title", "Untitled")}), "application/json")
             except Exception as e:
