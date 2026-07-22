@@ -36,14 +36,16 @@ def github_get_cache():
     content = base64.b64decode(meta["content"]).decode("utf-8")
     return json.loads(content)
 
+def _get_cache_sha(url):
+    req = urllib.request.Request(url, headers=_gh_headers())
+    with urllib.request.urlopen(req, timeout=15) as r:
+        return json.loads(r.read())["sha"]
+
 def github_put_cache(recipes_dict, message):
     """Write the current in-memory recipes back to GitHub so they survive a restart."""
     if not GITHUB_TOKEN or not GITHUB_REPO:
         return
     url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{CACHE_PATH}"
-    req = urllib.request.Request(url, headers=_gh_headers())
-    with urllib.request.urlopen(req, timeout=15) as r:
-        sha = json.loads(r.read())["sha"]
 
     recipes, manual = {}, []
     for key, r in recipes_dict.items():
@@ -52,18 +54,24 @@ def github_put_cache(recipes_dict, message):
         else:
             recipes[key] = {k: v for k, v in r.items() if k != "url"}
 
-    payload = {
-        "message": message,
-        "content": base64.b64encode(
-            json.dumps({"recipes": recipes, "manualRecipes": manual}, indent=2).encode("utf-8")
-        ).decode("utf-8"),
-        "sha": sha,
-    }
-    put_req = urllib.request.Request(
-        url, data=json.dumps(payload).encode("utf-8"), headers=_gh_headers(), method="PUT"
-    )
-    with urllib.request.urlopen(put_req, timeout=15) as r:
-        json.loads(r.read())
+    encoded = base64.b64encode(
+        json.dumps({"recipes": recipes, "manualRecipes": manual}, indent=2).encode("utf-8")
+    ).decode("utf-8")
+
+    for attempt in range(2):
+        sha = _get_cache_sha(url)
+        payload = {"message": message, "content": encoded, "sha": sha}
+        put_req = urllib.request.Request(
+            url, data=json.dumps(payload).encode("utf-8"), headers=_gh_headers(), method="PUT"
+        )
+        try:
+            with urllib.request.urlopen(put_req, timeout=15) as r:
+                json.loads(r.read())
+            return
+        except urllib.error.HTTPError as e:
+            if e.code == 409 and attempt == 0:
+                continue  # SHA conflict — retry with fresh SHA
+            raise
 
 def _push_cache_now(message):
     """Synchronous push; raises on failure so callers can handle it."""
