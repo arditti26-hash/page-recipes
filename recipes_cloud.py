@@ -161,8 +161,17 @@ def _parse_schema(r, url):
         "source":       "schema",
     }
 
+def _title_from_url(url):
+    """Best-effort human-readable title from a URL."""
+    try:
+        import urllib.parse
+        path = urllib.parse.urlparse(url).path.rstrip("/").split("/")[-1]
+        return path.replace("-", " ").replace("_", " ").title() or url
+    except Exception:
+        return url
+
 def fetch_recipe(url):
-    req = urllib.request.Request(url, headers={
+    headers = {
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
         "Accept-Language": "en-US,en;q=0.9",
@@ -171,9 +180,19 @@ def fetch_recipe(url):
         "DNT": "1",
         "Connection": "keep-alive",
         "Upgrade-Insecure-Requests": "1",
-    })
-    with urllib.request.urlopen(req, timeout=15) as r:
-        body = r.read().decode("utf-8", errors="replace")
+    }
+    try:
+        req = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(req, timeout=15) as r:
+            body = r.read().decode("utf-8", errors="replace")
+    except urllib.error.HTTPError as e:
+        if e.code in (403, 401, 429):
+            # Site blocks scrapers — save as link-only so it's still in the dashboard
+            return {
+                "title": _title_from_url(url), "description": "This site blocked automatic import — click 'View on website' to see the full recipe.",
+                "ingredients": [], "instructions": [], "image": "", "url": url, "source": "scrape"
+            }
+        raise
 
     for block in re.findall(
         r'<script[^>]*type=["\']application/ld\+json["\'][^>]*>(.*?)</script>',
