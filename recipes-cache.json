@@ -3625,6 +3625,31 @@
       ],
       "image": "https://hips.hearstapps.com/hmg-prod/images/marry-me-chicken-index-67a503f0a565c.jpg?crop=0.502xw:1.00xh;0.458xw,0&resize=1200:*",
       "source": "schema"
+    },
+    "https://broccyourbody.com/2021/12/22/creamy-chicken-chili/": {
+      "title": "https://broccyourbody.com/2021/12/22/creamy-chicken-chili/",
+      "description": "",
+      "ingredients": [],
+      "instructions": [],
+      "image": "",
+      "source": "scrape"
+    },
+    "https://cooking.nytimes.com/recipes/1024469-tomato-cheddar-toasts?unlocked_article_code=1.2FA.52SI.E1qth5dscoEd&smid=ck-recipe-iOS-share": {
+      "title": "Tomato Cheddar Toasts",
+      "description": "Tomato and Cheddar toasts don\u2019t need fussing \u2014 just crusty bread, swoops of mayonnaise, perfect summer tomatoes and the sharpest Cheddar you can find. It\u2019s in the construction where things can go from good to great. Instead of cheese that\u2019s sliced (which can be stiff and unrelenting) or broiled (and coagulated), take a cue from Chris Kronner\u2019s burger wisdom in \u201cA Burger to Believe In\u201d (Ten Speed Press, 2018) and stir finely grated Cheddar into the mayonnaise. When slathered on hot, toasted bread, the cheese will melt into a creamy base somewhere between a queso and pepper-free pimento cheese. It has the pluck of sharp Cheddar, albeit in a plush and delightful form.",
+      "ingredients": [
+        "2 ripe medium tomatoes, thinly sliced",
+        "Salt",
+        "\u00bd cup mayonnaise",
+        "\u00bd packed cup/2 ounces finely grated extra-sharp Cheddar",
+        "4 slices crusty bread"
+      ],
+      "instructions": [
+        "Arrange the tomatoes on a plate and sprinkle with salt. Stir together the mayonnaise, Cheddar and a pinch of salt.",
+        "Toast the bread however you like. Right when the bread\u2019s hot and ready, slather with the Cheddar mayonnaise. (Extra mayo will keep in the fridge for up to 2 weeks.) Top with the tomatoes and devour."
+      ],
+      "image": "https://static01.nyt.com/images/2023/08/01/multimedia/AS-tomato-cheddar-toast-pbgv/AS-tomato-cheddar-toast-pbgv-videoSixteenByNineJumbo1600.jpg",
+      "source": "schema"
     }
   },
   "manualRecipes": []
