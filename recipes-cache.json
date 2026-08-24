@@ -3679,6 +3679,14 @@
       ],
       "image": "https://static01.nyt.com/images/2024/09/10/multimedia/JG-Parmesan-Crusted-Salmon-Caesar-Saladrex-kjpb/JG-Parmesan-Crusted-Salmon-Caesar-Saladrex-kjpb-videoSixteenByNineJumbo1600.jpg",
       "source": "schema"
+    },
+    "https://www.purplecarrot.com/recipe/southwest-cheesy-mac-with-jalapenos-pepita-parmesan?srsltid=AfmBOorRNN_YMq11o8-Gl2Vax6EsMwHqL-4E0a3gPRASZuI0pVls39xI": {
+      "title": "https://www.purplecarrot.com/recipe/southwest-cheesy-mac-with-jalapenos-pepita-parmesan?srsltid=AfmBOorRNN_YMq11o8-Gl2Vax6EsMwHqL-4E0a3gPRASZuI0pVls39xI",
+      "description": "",
+      "ingredients": [],
+      "instructions": [],
+      "image": "",
+      "source": "scrape"
     }
   },
   "manualRecipes": []
